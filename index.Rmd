@@ -1,7 +1,6 @@
 ---
 title: "Building, Crossdating, and Analyzing a Tree Ring Chronology from Geneseo, NY"
 author: Greg Bream
-subtitle: 
 ---
 
 # Introduction
