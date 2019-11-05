@@ -1,87 +1,96 @@
 ---
 title: "Building, Crossdating, and Analyzing a Tree Ring Chronology from Geneseo, NY"
-author: Greg Bream
+author: "Greg Bream"
 ---
 
-# Introduction
-My really awesome and complete introduction will go here.  
+## Introduction
+The Genesee Valley of western New York is known for its historic oak trees. Building a mean-value chronology of oaks cored in this area will allow me to infer the general environmental conditions at a given time. Crossdating will allow me to be more confident in the dates assigned and yield accuracy to the values in the chronology.  It will also allow for more accurate detection of climate signal.  Droughts, for example can be inferred from years with consistently narrow rings within the chronology.  This can be explored further by crossdating with the Palmer drought severity index. Identifying growth releases of the cored trees will allow me to identify canopy disturbance events using time periods with consistently high values.  This analysis will help to infer the mechanisms behind growth patterns in oak trees in the study area.
 
-# Materials and methods
+## Materials and methods
 
-Narrative and most code will go here.  Describe what you are doing and show how to do it (with code).
+Materials:
 
-You can do bullets like this:
-
-* The first most important thing
-* The second most important thing
-* The third most important thing
-
-You can do numbers like this:
-
-1. The first most important thing
-2. The second most important thing
-3. The third most important thing
-
-See [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/) for all the amazing things you can do.
+* Personally collected tree ring-width data of oak trees in the form of CSV and compact files
 
 
-Here's my first code chunk.
-```{r}
-1+2
+### Plotting the Tree-Ring Series
+
+```{r message=FALSE }
+library(dplR)
+QuercusMaster <- read.rwl("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QuercusMaster.csv")
+plot(QuercusMaster, plot.type = "spag")
 ```
 
-Load any required packages in a code chunk (you may need to install some packages):
-
+### Detrending the Series
+##### In dendrochronology, detrending is the fitting of a curve to the ring-width data to remove patterns unique to each tree.  This includes the effects of tree age, disturbance events, and other growth trends due to site-specific drivers of change.  I chose to use a conservative approach to detrending the series using detrend().  The method argument specifies the detrending method, which in this case is fitting a negative exponential curve to the series.  The correlation of each series with the master is calculated using interseries.cor() and the results are in the table below.  Values of .32 or higher indicate a significant correlation and are in green.
 ```{r, message=F, warning=F}
-library(tidyverse)
-library(leaflet)
+QuercusMaster.rwi <- detrend(rwl = QuercusMaster, method = "ModNegExp")
+
+Interseries_Cor <- interseries.cor(QuercusMaster.rwi, prewhiten=TRUE,
+                                       method="spearman")
+#Changing column names
+names(Interseries_Cor)[1]<-"Correlation"
+names(Interseries_Cor)[2]<-"P-value"
+
 library(kableExtra)
-knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling
+library(magick)
+  kable(Interseries_Cor) %>%
+  kable_styling(bootstrap_options = "striped", full_width = T, position = "left", font_size = 13, fixed_thead = T) %>%
+    row_spec(which(Interseries_Cor$Correlation >= .32), bold = T, color = "green", background = NULL) %>%
+    scroll_box(width = "700px", height = "300px")
+    
 ```
 
-## Download and clean all required data
+
+### Mean Value Chronology
+##### Building a Mean Value Chronology out of the .rwi object created above using chron().  By default, chron() uses Tukey's biweight robust mean, which is unaffected by outliers and thus is a more accurate representation of the data.  The plot below plots the newly created mean chronology.  The second and third arguments of plot(), add.spline and nyrs add a smoothing spline with a wavelength (period) of 20 years.
 ```{r}
-n=20
-data=data.frame(x=runif(n,-180,180),
-                y=runif(n,-60,60),
-                size = runif(n, 5, 20),
-                category = factor(
-                  sample(letters[1:5], n, replace = TRUE)
-                  ),
-                value = rnorm(n))
+QuercusMaster.crn <- chron(QuercusMaster.rwi, prefix = "CAM")
+
+plot(QuercusMaster.crn, add.spline=TRUE, nyrs=20)
 ```
 
-```{r, results='asis'}
-data %>% 
-  slice(1:10) %>% #show only 1:n rows
-  kable(digits=2,align="c")%>% #make table and round to two digits
-  kable_styling(bootstrap_options = 
-                  c("striped", "hover", "condensed", "responsive")) #apply other formatting
+
+### Crossdating 
+##### Crossdating is of absolute importance in dendrochronology.  It involves identifying similar patterns in radial grown between multiple trees and applying those patterns to trees of unknown dates in order to ascertain the correct tree age.  In short, it assures that you are assigning the correct calendar year to the growth rings of each tree.  In the case of my cores, I am already able to accurately assign dates, since the trees were living at the time of coring and I have the dates of measurement.  That being said, there is still a lot to be gained from crossdating in this case, including assigning dates to future cored trees in the area, and strengthening detection of environmental signal.  Crossdating is done with the function corr.rwl.seg().  The argument seg.length specifies the length of the segments to crossdate.  I chose the segment length to be 50 years, which is likely the longest segment that I should use, since the average series length is approximately 100 years.  By default, the overlap for the segments is half of the segment length, 25 years.  The pcrit argument specifies the critical value for the correlation.  The blue segments on the first plot below represent a significant correlation for that segment, while the red represent low correlations and thus, potential crossdating issues.  The issues in this case are likely due to the broad range of conditions that the series within this specific chronology come from across the Genesee Valley.
+```{r }
+Cross_SEGS <- corr.rwl.seg(QuercusMaster, seg.length = 50, pcrit = 0.10)
+
+
+
 ```
 
-Add any additional processing steps here.
 
-# Results
+### Growth Releases
+##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that multiple trees experienced growth releases at 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate. 
+```{r message=FALSE}
+library(TRADER)
+library(jpeg)
+Quercus_nopartials <- read.rwl("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/Quercus_Nopartials.csv")
 
-Show tables, plots, etc. and describe them.
-
-```{r, fig.width=6, fig.height=3, fig.cap="Map of completely random data"}
-m <- leaflet(data) %>% 
-  addTiles() %>% 
-  addCircleMarkers(~x, ~y, radius = ~size,color = ~as.factor(category)) %>% 
-  addPopups(~x[2], ~y[2], "Random popup")
-m  # a map with the default OSM tile layer
+#Radial Growth Averaging for Quercus (all)
+growthAveragingALL(Quercus_nopartials, releases = NULL, m1 = 10, m2 = 10, buffer = 10, prefix = "ga", drawing = TRUE, criteria = 0.25, criteria2 = 0.5, gfun = mean, length = 5, storedev = jpeg)
+#Prefix "ga" just means that it's the growth average(ga).  If this was for the absoluteIncreaseALL() function, I would put the prefix as "ai" for absolute increase.
+# Define variable containing url
+GA_165 <- "https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/ga_165-QR.jpeg"
+GA_133 <- "https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/ga_X133.12QA.jpeg"
+GA_187 <- "https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/ga_X187.12QR.jpeg"
+```
+<center><img src="`r GA_165`"></center>
+<center><img src="`r GA_133`"></center>
+<center><img src="`r GA_187`"></center>
 ```
 
 
 ```{r}
-data %>% 
-  ggplot(aes(x=x,y=y,col=category))+
-  geom_point()
+
 ```
 
-# Conclusions
+## Conclusions
 
-What have you learned?  Are there any broader implications?
+This is my first draft.
 
-# References
+## References
+Bunn AG. (2008). A dendrochronology program library in R (dplR). Dendrochronologia, 26, 115–124.
+
+Nowacki GJ & Abrams, MD. (2008). Radial-growth averaging criteria for reconstructing disturbance histories from presettlement-origin oaks. Ecological Monographs, 67. 
