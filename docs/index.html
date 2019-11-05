@@ -15,7 +15,7 @@
 
 <title>Building, Crossdating, and Analyzing a Tree Ring Chronology from Geneseo, NY</title>
 
-<script src="site_libs/jquery-1.12.4/jquery.min.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/simplex.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -28,14 +28,6 @@
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
-<script src="site_libs/htmlwidgets-1.5.1/htmlwidgets.js"></script>
-<link href="site_libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
-<script src="site_libs/leaflet-1.3.1/leaflet.js"></script>
-<link href="site_libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
-<script src="site_libs/Proj4Leaflet-1.0.1/proj4-compressed.js"></script>
-<script src="site_libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
-<link href="site_libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
-<script src="site_libs/leaflet-binding-2.0.2/leaflet.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -373,271 +365,1082 @@ div.tocify {
 </div>
 
 
-<div id="introduction" class="section level1">
-<h1>Introduction</h1>
-<p>My really awesome and complete introduction will go here.</p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>The Genesee Valley of western New York is known for its historic oak trees. Building a mean-value chronology of oaks cored in this area will allow me to infer the general environmental conditions at a given time. Crossdating will allow me to be more confident in the dates assigned and yield accuracy to the values in the chronology. It will also allow for more accurate detection of climate signal. Droughts, for example can be inferred from years with consistently narrow rings within the chronology. This can be explored further by crossdating with the Palmer drought severity index. Identifying growth releases of the cored trees will allow me to identify canopy disturbance events using time periods with consistently high values. This analysis will help to infer the mechanisms behind growth patterns in oak trees in the study area.</p>
 </div>
-<div id="materials-and-methods" class="section level1">
-<h1>Materials and methods</h1>
-<p>Narrative and most code will go here. Describe what you are doing and show how to do it (with code).</p>
-<p>You can do bullets like this:</p>
+<div id="materials-and-methods" class="section level2">
+<h2>Materials and methods</h2>
+<p>Materials:</p>
 <ul>
-<li>The first most important thing</li>
-<li>The second most important thing</li>
-<li>The third most important thing</li>
+<li>Personally collected tree ring-width data of oak trees in the form of CSV and compact files</li>
 </ul>
-<p>You can do numbers like this:</p>
-<ol style="list-style-type: decimal">
-<li>The first most important thing</li>
-<li>The second most important thing</li>
-<li>The third most important thing</li>
-</ol>
-<p>See <a href="http://rmarkdown.rstudio.com/">http://rmarkdown.rstudio.com/</a> for all the amazing things you can do.</p>
-<p>Here’s my first code chunk.</p>
-<pre class="r"><code>1+2</code></pre>
-<pre><code>## [1] 3</code></pre>
-<p>Load any required packages in a code chunk (you may need to install some packages):</p>
-<pre class="r"><code>library(tidyverse)
-library(leaflet)
+<div id="plotting-the-tree-ring-series" class="section level3">
+<h3>Plotting the Tree-Ring Series</h3>
+<pre class="r"><code>library(dplR)
+QuercusMaster &lt;- read.rwl(&quot;https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QuercusMaster.csv&quot;)</code></pre>
+<pre><code>## Attempting to automatically detect format.
+## Detected a csv file.</code></pre>
+<pre class="r"><code>plot(QuercusMaster, plot.type = &quot;spag&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+</div>
+<div id="detrending-the-series" class="section level3">
+<h3>Detrending the Series</h3>
+<div id="in-dendrochronology-detrending-is-the-fitting-of-a-curve-to-the-ring-width-data-to-remove-patterns-unique-to-each-tree.-this-includes-the-effects-of-tree-age-disturbance-events-and-other-growth-trends-due-to-site-specific-drivers-of-change.-i-chose-to-use-a-conservative-approach-to-detrending-the-series-using-detrend.-the-method-argument-specifies-the-detrending-method-which-in-this-case-is-fitting-a-negative-exponential-curve-to-the-series.-the-correlation-of-each-series-with-the-master-is-calculated-using-interseries.cor-and-the-results-are-in-the-table-below.-values-of-.32-or-higher-indicate-a-significant-correlation-and-are-in-green." class="section level5">
+<h5>In dendrochronology, detrending is the fitting of a curve to the ring-width data to remove patterns unique to each tree. This includes the effects of tree age, disturbance events, and other growth trends due to site-specific drivers of change. I chose to use a conservative approach to detrending the series using detrend(). The method argument specifies the detrending method, which in this case is fitting a negative exponential curve to the series. The correlation of each series with the master is calculated using interseries.cor() and the results are in the table below. Values of .32 or higher indicate a significant correlation and are in green.</h5>
+<pre class="r"><code>QuercusMaster.rwi &lt;- detrend(rwl = QuercusMaster, method = &quot;ModNegExp&quot;)
+
+Interseries_Cor &lt;- interseries.cor(QuercusMaster.rwi, prewhiten=TRUE,
+                                       method=&quot;spearman&quot;)
+#Changing column names
+names(Interseries_Cor)[1]&lt;-&quot;Correlation&quot;
+names(Interseries_Cor)[2]&lt;-&quot;P-value&quot;
+
 library(kableExtra)
-knitr::opts_chunk$set(cache=TRUE)  # cache the results for quick compiling</code></pre>
-<div id="download-and-clean-all-required-data" class="section level2">
-<h2>Download and clean all required data</h2>
-<pre class="r"><code>n=20
-data=data.frame(x=runif(n,-180,180),
-                y=runif(n,-60,60),
-                size = runif(n, 5, 20),
-                category = factor(
-                  sample(letters[1:5], n, replace = TRUE)
-                  ),
-                value = rnorm(n))</code></pre>
-<pre class="r"><code>data %&gt;% 
-  slice(1:10) %&gt;% #show only 1:n rows
-  kable(digits=2,align=&quot;c&quot;)%&gt;% #make table and round to two digits
-  kable_styling(bootstrap_options = 
-                  c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;responsive&quot;)) #apply other formatting</code></pre>
-<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+library(magick)
+  kable(Interseries_Cor) %&gt;%
+  kable_styling(bootstrap_options = &quot;striped&quot;, full_width = T, position = &quot;left&quot;, font_size = 13, fixed_thead = T) %&gt;%
+    row_spec(which(Interseries_Cor$Correlation &gt;= .32), bold = T, color = &quot;green&quot;, background = NULL) %&gt;%
+    scroll_box(width = &quot;700px&quot;, height = &quot;300px&quot;)</code></pre>
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; overflow-x: scroll; width:700px; ">
+<table class="table table-striped" style="font-size: 13px; ">
 <thead>
 <tr>
-<th style="text-align:center;">
-x
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;position: sticky; top:0; background-color: #FFFFFF;">
 </th>
-<th style="text-align:center;">
-y
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;position: sticky; top:0; background-color: #FFFFFF;">
+Correlation
 </th>
-<th style="text-align:center;">
-size
-</th>
-<th style="text-align:center;">
-category
-</th>
-<th style="text-align:center;">
-value
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;position: sticky; top:0; background-color: #FFFFFF;">
+P-value
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center;">
--7.94
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X15.16QA
 </td>
-<td style="text-align:center;">
-26.87
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5211277
 </td>
-<td style="text-align:center;">
-12.70
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
-0.50
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
 </td>
 </tr>
 <tr>
-<td style="text-align:center;">
--78.41
+<td style="text-align:left;">
+X16.16QA
 </td>
-<td style="text-align:center;">
-29.34
+<td style="text-align:right;">
+0.2931973
 </td>
-<td style="text-align:center;">
-8.52
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
--0.24
+<td style="text-align:right;">
+0.0016691
 </td>
 </tr>
 <tr>
-<td style="text-align:center;">
--43.48
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X35.4QA
 </td>
-<td style="text-align:center;">
-40.76
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3954946
 </td>
-<td style="text-align:center;">
-8.24
-</td>
-<td style="text-align:center;">
-e
-</td>
-<td style="text-align:center;">
--0.13
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000844
 </td>
 </tr>
 <tr>
-<td style="text-align:center;">
-53.18
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X37.4QA
 </td>
-<td style="text-align:center;">
--28.95
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3945181
 </td>
-<td style="text-align:center;">
-8.45
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
--1.26
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
 </td>
 </tr>
 <tr>
-<td style="text-align:center;">
--76.46
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X38.8aQA
 </td>
-<td style="text-align:center;">
--29.67
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5068413
 </td>
-<td style="text-align:center;">
-8.90
-</td>
-<td style="text-align:center;">
-a
-</td>
-<td style="text-align:center;">
--0.80
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
 </td>
 </tr>
 <tr>
-<td style="text-align:center;">
--100.66
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X39.8QA
 </td>
-<td style="text-align:center;">
-22.14
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5373408
 </td>
-<td style="text-align:center;">
-9.97
-</td>
-<td style="text-align:center;">
-a
-</td>
-<td style="text-align:center;">
-1.27
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
 </td>
 </tr>
 <tr>
-<td style="text-align:center;">
--35.95
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X40.16QA
 </td>
-<td style="text-align:center;">
--11.71
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3909089
 </td>
-<td style="text-align:center;">
-5.15
-</td>
-<td style="text-align:center;">
-d
-</td>
-<td style="text-align:center;">
--1.04
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000001
 </td>
 </tr>
 <tr>
-<td style="text-align:center;">
--79.15
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X74.12QA
 </td>
-<td style="text-align:center;">
--16.14
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4909964
 </td>
-<td style="text-align:center;">
-19.84
-</td>
-<td style="text-align:center;">
-e
-</td>
-<td style="text-align:center;">
--1.06
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0001745
 </td>
 </tr>
 <tr>
-<td style="text-align:center;">
-129.47
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X88.12QA
 </td>
-<td style="text-align:center;">
--28.49
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5847574
 </td>
-<td style="text-align:center;">
-9.70
-</td>
-<td style="text-align:center;">
-c
-</td>
-<td style="text-align:center;">
--1.14
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
 </td>
 </tr>
 <tr>
-<td style="text-align:center;">
--1.61
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X89.12QA
 </td>
-<td style="text-align:center;">
-5.08
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.6272679
 </td>
-<td style="text-align:center;">
-6.41
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
 </td>
-<td style="text-align:center;">
-c
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X95.8QA
 </td>
-<td style="text-align:center;">
--2.43
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4954436
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000008
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X117.8QA
+</td>
+<td style="text-align:right;">
+0.2577230
+</td>
+<td style="text-align:right;">
+0.0001388
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X133.12QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4783419
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000001
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X138.8QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4106797
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000003
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X179.4QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4750816
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X184.4QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5299240
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X202.16QA
+</td>
+<td style="text-align:right;">
+0.2773888
+</td>
+<td style="text-align:right;">
+0.0017246
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X206.12QA
+</td>
+<td style="text-align:right;">
+0.3165883
+</td>
+<td style="text-align:right;">
+0.0000160
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X210.8QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5814753
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X215.8QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3999653
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000036
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X219.16QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5002709
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X223.4QA
+</td>
+<td style="text-align:right;">
+0.3185586
+</td>
+<td style="text-align:right;">
+0.0000027
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X228.16QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5666847
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X233.12QA
+</td>
+<td style="text-align:right;">
+0.2596662
+</td>
+<td style="text-align:right;">
+0.0007150
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X247.16QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5748401
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X261.16QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5524407
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X269.12QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5729386
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X278.16QA
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4700855
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0002222
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X18.16QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5075225
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000006
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X20.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5072344
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000123
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X21.8QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3794086
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000769
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X44.8QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4398490
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000004
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X54.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5714932
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000085
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X63.8QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4002801
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0089204
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X94.16QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5275362
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0001214
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X96.8QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5689734
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X109.15QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4377470
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0189630
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X129.16QR
+</td>
+<td style="text-align:right;">
+0.3049109
+</td>
+<td style="text-align:right;">
+0.0001399
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X132.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5591091
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X134.8QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3852779
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0015032
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X135.4QR
+</td>
+<td style="text-align:right;">
+0.1989158
+</td>
+<td style="text-align:right;">
+0.0064553
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X140.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3281655
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0017506
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X144.4QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3777065
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0001852
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X154.16QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4709075
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000352
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X165.QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4996476
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0003252
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X172.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.6394089
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0001299
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X180.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5312440
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000023
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X181.8QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3418697
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0001222
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X182.12QR
+</td>
+<td style="text-align:right;">
+-0.2876847
+</td>
+<td style="text-align:right;">
+0.9352792
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X183.8QR
+</td>
+<td style="text-align:right;">
+0.1762785
+</td>
+<td style="text-align:right;">
+0.1100210
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X187.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5288312
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000007
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X194.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5147144
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000001
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X205.8QR
+</td>
+<td style="text-align:right;">
+0.3111289
+</td>
+<td style="text-align:right;">
+0.0003203
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X207.4QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4076107
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000901
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X213.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5977449
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000134
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X217.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5007193
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X227.11QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3449328
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0393133
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X229.4QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4318500
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000019
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X236.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3297571
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0204466
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X237.8QR
+</td>
+<td style="text-align:right;">
+0.3195076
+</td>
+<td style="text-align:right;">
+0.0000058
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X238.8QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4816337
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X239.4QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4613923
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000576
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X240.12QR
+</td>
+<td style="text-align:right;">
+0.3125948
+</td>
+<td style="text-align:right;">
+0.0000346
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X241.4QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4181452
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0100092
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X245.8QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.6570842
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X273.8QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5701357
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000074
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X276.4QR
+</td>
+<td style="text-align:right;">
+0.2664577
+</td>
+<td style="text-align:right;">
+0.0061511
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X277.12QR
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5290500
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000002
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X46.8QV
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3740536
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000027
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X53.16QV
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5138273
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000027
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X62.8QV
+</td>
+<td style="text-align:right;">
+0.2898785
+</td>
+<td style="text-align:right;">
+0.0368703
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X65.8QV
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4295148
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0001465
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X178.8QV
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4058685
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0002475
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X230.16QV
+</td>
+<td style="text-align:right;">
+0.2982466
+</td>
+<td style="text-align:right;">
+0.0000563
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X248.4QV
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5166778
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000002
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X274.8QV
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.5265958
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X125.12QP
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4417841
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X22.12QM
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3264341
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000251
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X23.8QM
+</td>
+<td style="text-align:right;">
+0.1442107
+</td>
+<td style="text-align:right;">
+0.0469577
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X79.8QM
+</td>
+<td style="text-align:right;">
+0.3134091
+</td>
+<td style="text-align:right;">
+0.0005635
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X36.16QMu
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4834440
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000001
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X77.
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.4293064
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000022
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X92.
+</td>
+<td style="text-align:right;">
+0.1105140
+</td>
+<td style="text-align:right;">
+0.1186142
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X118.
+</td>
+<td style="text-align:right;">
+0.2866655
+</td>
+<td style="text-align:right;">
+0.0007125
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+X224.
+</td>
+<td style="text-align:right;">
+0.0769477
+</td>
+<td style="text-align:right;">
+0.1461654
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;color: green !important;">
+X235.
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.3944469
+</td>
+<td style="text-align:right;font-weight: bold;color: green !important;">
+0.0000000
 </td>
 </tr>
 </tbody>
 </table>
-<p>Add any additional processing steps here.</p>
 </div>
 </div>
-<div id="results" class="section level1">
-<h1>Results</h1>
-<p>Show tables, plots, etc. and describe them.</p>
-<pre class="r"><code>m &lt;- leaflet(data) %&gt;% 
-  addTiles() %&gt;% 
-  addCircleMarkers(~x, ~y, radius = ~size,color = ~as.factor(category)) %&gt;% 
-  addPopups(~x[2], ~y[2], &quot;Random popup&quot;)
-m  # a map with the default OSM tile layer</code></pre>
-<div class="figure">
-<div id="htmlwidget-5063ee10c3ccb515e452" style="width:576px;height:288px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-5063ee10c3ccb515e452">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addCircleMarkers","args":[[26.8711862806231,29.3360611796379,40.7632035389543,-28.9460401050746,-29.6711595263332,22.1400205604732,-11.708952197805,-16.1360232811421,-28.4892261587083,5.07955958135426,17.4835232645273,-46.4684301707894,34.764169966802,36.2987820804119,55.593065880239,30.3007031511515,34.8416176903993,-35.5134846176952,12.0955264940858,-40.6186180002987],[-7.93655178509653,-78.4139182884246,-43.4807436726987,53.1846274528652,-76.4600874390453,-100.657831868157,-35.9487301111221,-79.1465060133487,129.470193693414,-1.60592017695308,-92.2818873077631,141.772127570584,26.3179058488458,119.271678552032,-155.729067558423,116.805441845208,151.581698516384,31.5576258022338,163.745646150783,-70.9502083528787],[12.7034337702207,8.51984445005655,8.24056827928871,8.44510515336879,8.89624061179347,9.97424924164079,5.14841507654637,19.8392452741973,9.69707298907451,6.4114267192781,18.6572482669726,18.0051899806131,13.4826176613569,11.5701327496208,18.115467907628,7.78893009526655,16.7642575211357,6.55098917894065,13.9647512836382,7.00566540472209],null,null,{"interactive":true,"className":"","stroke":true,"color":["c","c","e","c","a","a","d","e","c","c","e","c","a","a","c","a","e","d","d","a"],"weight":5,"opacity":0.5,"fill":true,"fillColor":["c","c","e","c","a","a","d","e","c","c","e","c","a","a","c","a","e","d","d","a"],"fillOpacity":0.2},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPopups","args":[29.3360611796379,-78.4139182884246,"Random popup",null,null,{"maxWidth":300,"minWidth":50,"autoPan":true,"keepInView":false,"closeButton":true,"className":""}]}],"limits":{"lat":[-46.4684301707894,55.593065880239],"lng":[-155.729067558423,163.745646150783]}},"evals":[],"jsHooks":[]}</script>
-<p class="caption">
-Map of completely random data
-</p>
 </div>
-<pre class="r"><code>data %&gt;% 
-  ggplot(aes(x=x,y=y,col=category))+
-  geom_point()</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<div id="mean-value-chronology" class="section level3">
+<h3>Mean Value Chronology</h3>
+<div id="building-a-mean-value-chronology-out-of-the-.rwi-object-created-above-using-chron.-by-default-chron-uses-tukeys-biweight-robust-mean-which-is-unaffected-by-outliers-and-thus-is-a-more-accurate-representation-of-the-data.-the-plot-below-plots-the-newly-created-mean-chronology.-the-second-and-third-arguments-of-plot-add.spline-and-nyrs-add-a-smoothing-spline-with-a-wavelength-period-of-20-years." class="section level5">
+<h5>Building a Mean Value Chronology out of the .rwi object created above using chron(). By default, chron() uses Tukey’s biweight robust mean, which is unaffected by outliers and thus is a more accurate representation of the data. The plot below plots the newly created mean chronology. The second and third arguments of plot(), add.spline and nyrs add a smoothing spline with a wavelength (period) of 20 years.</h5>
+<pre class="r"><code>QuercusMaster.crn &lt;- chron(QuercusMaster.rwi, prefix = &quot;CAM&quot;)
+
+plot(QuercusMaster.crn, add.spline=TRUE, nyrs=20)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 </div>
-<div id="conclusions" class="section level1">
-<h1>Conclusions</h1>
-<p>What have you learned? Are there any broader implications?</p>
 </div>
-<div id="references" class="section level1">
-<h1>References</h1>
+<div id="crossdating" class="section level3">
+<h3>Crossdating</h3>
+<div id="crossdating-is-of-absolute-importance-in-dendrochronology.-it-involves-identifying-similar-patterns-in-radial-grown-between-multiple-trees-and-applying-those-patterns-to-trees-of-unknown-dates-in-order-to-ascertain-the-correct-tree-age.-in-short-it-assures-that-you-are-assigning-the-correct-calendar-year-to-the-growth-rings-of-each-tree.-in-the-case-of-my-cores-i-am-already-able-to-accurately-assign-dates-since-the-trees-were-living-at-the-time-of-coring-and-i-have-the-dates-of-measurement.-that-being-said-there-is-still-a-lot-to-be-gained-from-crossdating-in-this-case-including-assigning-dates-to-future-cored-trees-in-the-area-and-strengthening-detection-of-environmental-signal.-crossdating-is-done-with-the-function-corr.rwl.seg.-the-argument-seg.length-specifies-the-length-of-the-segments-to-crossdate.-i-chose-the-segment-length-to-be-50-years-which-is-likely-the-longest-segment-that-i-should-use-since-the-average-series-length-is-approximately-100-years.-by-default-the-overlap-for-the-segments-is-half-of-the-segment-length-25-years.-the-pcrit-argument-specifies-the-critical-value-for-the-correlation.-the-blue-segments-on-the-first-plot-below-represent-a-significant-correlation-for-that-segment-while-the-red-represent-low-correlations-and-thus-potential-crossdating-issues.-the-issues-in-this-case-are-likely-due-to-the-broad-range-of-conditions-that-the-series-within-this-specific-chronology-come-from-across-the-genesee-valley." class="section level5">
+<h5>Crossdating is of absolute importance in dendrochronology. It involves identifying similar patterns in radial grown between multiple trees and applying those patterns to trees of unknown dates in order to ascertain the correct tree age. In short, it assures that you are assigning the correct calendar year to the growth rings of each tree. In the case of my cores, I am already able to accurately assign dates, since the trees were living at the time of coring and I have the dates of measurement. That being said, there is still a lot to be gained from crossdating in this case, including assigning dates to future cored trees in the area, and strengthening detection of environmental signal. Crossdating is done with the function corr.rwl.seg(). The argument seg.length specifies the length of the segments to crossdate. I chose the segment length to be 50 years, which is likely the longest segment that I should use, since the average series length is approximately 100 years. By default, the overlap for the segments is half of the segment length, 25 years. The pcrit argument specifies the critical value for the correlation. The blue segments on the first plot below represent a significant correlation for that segment, while the red represent low correlations and thus, potential crossdating issues. The issues in this case are likely due to the broad range of conditions that the series within this specific chronology come from across the Genesee Valley.</h5>
+<pre class="r"><code>Cross_SEGS &lt;- corr.rwl.seg(QuercusMaster, seg.length = 50, pcrit = 0.10)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
+</div>
+<div id="growth-releases" class="section level3">
+<h3>Growth Releases</h3>
+<div id="growth-releases-are-periods-in-a-trees-growth-where-ring-width-is-at-least-25-greater-than-mean-of-both-the-preceding-and-subsequent-10-year-period-and-lasting-several-years-nowacki-abrams-1997.-a-change-of-50-signifies-a-major-release.-a-growth-release-means-that-some-type-of-disturbance-event-occurred-near-the-tree.-this-includes-death-of-nearby-trees-due-to-natural-or-human-driven-causes.-the-function-below-growthaveragingall-calculates-growth-releases-in-each-series-and-produces-graphs-for-each-of-the-series-in-the-chronology.-one-thing-that-stands-out-to-me-is-that-multiple-trees-experienced-growth-releases-at-1991.-through-taking-measurements-1991-was-deemed-what-is-called-an-indicator-year.-that-is-a-year-that-is-consistently-narrow-across-the-majority-of-the-tree-cores.-through-crossdating-with-the-palmer-drought-severity-index-pdsi-this-lack-of-growth-was-likely-due-to-drought.-what-i-find-interesting-about-this-is-that-three-of-the-series-x133-12qa-x165-qr-and-x187-12qr-experienced-significantly-increased-growth-during-this-time.-it-is-likely-that-these-trees-were-smaller-and-in-the-understory-and-death-of-larger-tree-or-trees-in-the-canopy-lead-to-in-increase-in-available-light-and-consequently-an-increase-in-growth-rate." class="section level5">
+<h5>Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki &amp; Abrams, 1997). A change of 50% signifies a major release. A growth release means that some type of disturbance event occurred near the tree. This includes death of nearby trees due to natural or human-driven causes. The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology. One thing that stands out to me is that multiple trees experienced growth releases at 1991. Through taking measurements, 1991 was deemed what is called an indicator year. That is, a year that is consistently narrow across the majority of the tree cores. Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought. What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time. It is likely that these trees were smaller and in the understory, and death of larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate.</h5>
+<pre class="r"><code>library(TRADER)
+library(jpeg)
+Quercus_nopartials &lt;- read.rwl(&quot;https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/Quercus_Nopartials.csv&quot;)</code></pre>
+<pre><code>## Attempting to automatically detect format.
+## Detected a csv file.</code></pre>
+<pre class="r"><code>#Radial Growth Averaging for Quercus (all)
+growthAveragingALL(Quercus_nopartials, releases = NULL, m1 = 10, m2 = 10, buffer = 10, prefix = &quot;ga&quot;, drawing = TRUE, criteria = 0.25, criteria2 = 0.5, gfun = mean, length = 5, storedev = jpeg)</code></pre>
+<pre><code>## [1] &quot;## Nowacki &amp; Abrams analysis!&quot;
+## [1] &quot;Criteria 0.25 Criteria2 0.5 m1 10 m2 10 Buffer 10 Length 5&quot;
+## [1] &quot;Total number of releases &gt;= 0.25 &amp; &lt; 0.5 is 43&quot;
+## inyears
+## 1824 1841 1842 1859 1863 1875 1882 1894 1901 1924 1927 1928 1930 1934 1936 
+##    1    1    1    1    1    1    1    1    1    1    1    1    2    1    1 
+## 1937 1938 1945 1948 1949 1957 1960 1967 1968 1973 1979 1985 1990 1991 1996 
+##    2    1    1    1    1    2    1    1    2    1    3    1    1    3    1 
+## 1997 1999 2001 2003 
+##    1    1    2    1 
+## [1] &quot;Total number of releases &gt;= 0.5 is 45&quot;
+## inyears
+## 1830 1860 1868 1872 1875 1879 1896 1901 1903 1905 1912 1914 1916 1918 1922 
+##    1    1    1    1    1    1    1    1    2    1    1    1    1    1    2 
+## 1925 1930 1931 1934 1936 1942 1945 1955 1957 1958 1961 1964 1965 1967 1968 
+##    1    1    1    1    1    1    1    1    1    2    1    1    1    1    1 
+## 1969 1970 1974 1979 1990 1991 1994 2004 2005 
+##    1    1    1    2    1    1    3    1    1</code></pre>
+<pre class="r"><code>#Prefix &quot;ga&quot; just means that it&#39;s the growth average(ga).  If this was for the absoluteIncreaseALL() function, I would put the prefix as &quot;ai&quot; for absolute increase.
+# Define variable containing url
+GA_165 &lt;- &quot;https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/ga_165-QR.jpeg&quot;
+GA_133 &lt;- &quot;https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/ga_X133.12QA.jpeg&quot;
+GA_187 &lt;- &quot;https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/ga_X187.12QR.jpeg&quot;</code></pre>
+<center>
+<img src="https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/ga_165-QR.jpeg">
+</center>
+<center>
+<img src="https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/ga_X133.12QA.jpeg">
+</center>
+<center>
+<img src="https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/ga_X187.12QR.jpeg">
+</center>
+<p>```</p>
+</div>
+</div>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>This is my first draft.</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Bunn AG. (2008). A dendrochronology program library in R (dplR). Dendrochronologia, 26, 115–124.</p>
+<p>Nowacki GJ &amp; Abrams, MD. (2008). Radial-growth averaging criteria for reconstructing disturbance histories from presettlement-origin oaks. Ecological Monographs, 67.</p>
 </div>
 
 <!-- give the footer some space -->
