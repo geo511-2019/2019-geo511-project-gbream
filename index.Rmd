@@ -3,7 +3,7 @@ title: "Building, Crossdating, and Analyzing a Tree Ring Chronology from Geneseo
 author: "Greg Bream"
 ---
 
-## Introduction
+## Introduction 
 The Genesee Valley of western New York is known for its historic oak trees. Building a mean-value chronology of oaks cored in this area will allow me to infer the general environmental conditions at a given time. Crossdating will allow me to be more confident in the dates assigned and yield accuracy to the values in the chronology.  It will also allow for more accurate detection of climate signal.  Droughts, for example can be inferred from years with consistently narrow rings within the chronology.  This can be explored further by crossdating with the Palmer drought severity index. Identifying growth releases of the cored trees will allow me to identify canopy disturbance events using time periods with consistently high values.  This analysis will help to infer the mechanisms behind growth patterns in oak trees in the study area.
 
 ## Materials and methods
@@ -42,7 +42,7 @@ library(magick)
 ```
 
 
-### Mean Value Chronology
+### Mean Value Chronology 
 ##### Building a Mean Value Chronology out of the .rwi object created above using chron().  By default, chron() uses Tukey's biweight robust mean, which is unaffected by outliers and thus is a more accurate representation of the data.  The plot below plots the newly created mean chronology.  The second and third arguments of plot(), add.spline and nyrs add a smoothing spline with a wavelength (period) of 20 years.
 ```{r}
 QuercusMaster.crn <- chron(QuercusMaster.rwi, prefix = "CAM")
@@ -61,7 +61,7 @@ Cross_SEGS <- corr.rwl.seg(QuercusMaster, seg.length = 50, pcrit = 0.10)
 ```
 
 
-### Growth Releases
+### Growth Releases 
 ##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that multiple trees experienced growth releases at 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate. 
 ```{r message=FALSE}
 library(TRADER)
