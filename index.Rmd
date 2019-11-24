@@ -3,17 +3,17 @@ title: "Building, Crossdating, and Analyzing a Tree Ring Chronology from Geneseo
 author: "Greg Bream"
 ---
 
-## Introduction
+## Introduction 
 The Genesee Valley of western New York is known for its historic oak trees. Building a mean-value chronology of oaks cored in this area will allow me to infer the general environmental conditions at a given time. Crossdating will allow me to be more confident in the dates assigned and yield accuracy to the values in the chronology.  It will also allow for more accurate detection of climate signal.  Droughts, for example can be inferred from years with consistently narrow rings within the chronology.  This can be explored further by crossdating with the Palmer drought severity index. Identifying growth releases of the cored trees will allow me to identify canopy disturbance events using time periods with consistently high values.  This analysis will help to infer the mechanisms behind growth patterns in oak trees in the study area.
 
-## Materials and methods
+## Materials and methods 
 
 Materials:
 
 * Personally collected tree ring-width data of oak trees in the form of CSV and compact files
 
 
-### Plotting the Tree-Ring Series
+### Plotting the Tree-Ring Series 
 
 ```{r message=FALSE }
 library(dplR)
@@ -21,7 +21,7 @@ QuercusMaster <- read.rwl("https://raw.githubusercontent.com/geo511-2019/2019-ge
 plot(QuercusMaster, plot.type = "spag")
 ```
 
-### Detrending the Series
+### Detrending the Series 
 ##### In dendrochronology, detrending is the fitting of a curve to the ring-width data to remove patterns unique to each tree.  This includes the effects of tree age, disturbance events, and other growth trends due to site-specific drivers of change.  I chose to use a conservative approach to detrending the series using detrend().  The method argument specifies the detrending method, which in this case is fitting a negative exponential curve to the series.  The correlation of each series with the master is calculated using interseries.cor() and the results are in the table below.  Values of .32 or higher indicate a significant correlation and are in green.
 ```{r, message=F, warning=F}
 QuercusMaster.rwi <- detrend(rwl = QuercusMaster, method = "ModNegExp")
@@ -42,7 +42,7 @@ library(magick)
 ```
 
 
-### Mean Value Chronology
+### Mean Value Chronology 
 ##### Building a Mean Value Chronology out of the .rwi object created above using chron().  By default, chron() uses Tukey's biweight robust mean, which is unaffected by outliers and thus is a more accurate representation of the data.  The plot below plots the newly created mean chronology.  The second and third arguments of plot(), add.spline and nyrs add a smoothing spline with a wavelength (period) of 20 years.
 ```{r}
 QuercusMaster.crn <- chron(QuercusMaster.rwi, prefix = "CAM")
@@ -51,7 +51,7 @@ plot(QuercusMaster.crn, add.spline=TRUE, nyrs=20)
 ```
 
 
-### Crossdating 
+### Crossdating  
 ##### Crossdating is of absolute importance in dendrochronology.  It involves identifying similar patterns in radial grown between multiple trees and applying those patterns to trees of unknown dates in order to ascertain the correct tree age.  In short, it assures that you are assigning the correct calendar year to the growth rings of each tree.  In the case of my cores, I am already able to accurately assign dates, since the trees were living at the time of coring and I have the dates of measurement.  That being said, there is still a lot to be gained from crossdating in this case, including assigning dates to future cored trees in the area, and strengthening detection of environmental signal.  Crossdating is done with the function corr.rwl.seg().  The argument seg.length specifies the length of the segments to crossdate.  I chose the segment length to be 50 years, which is likely the longest segment that I should use, since the average series length is approximately 100 years.  By default, the overlap for the segments is half of the segment length, 25 years.  The pcrit argument specifies the critical value for the correlation.  The blue segments on the first plot below represent a significant correlation for that segment, while the red represent low correlations and thus, potential crossdating issues.  The issues in this case are likely due to the broad range of conditions that the series within this specific chronology come from across the Genesee Valley.
 ```{r }
 Cross_SEGS <- corr.rwl.seg(QuercusMaster, seg.length = 50, pcrit = 0.10)
@@ -61,7 +61,7 @@ Cross_SEGS <- corr.rwl.seg(QuercusMaster, seg.length = 50, pcrit = 0.10)
 ```
 
 
-### Growth Releases
+### Growth Releases 
 ##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that multiple trees experienced growth releases at 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate. 
 ```{r message=FALSE}
 library(TRADER)
@@ -86,7 +86,7 @@ GA_187 <- "https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbr
 
 ```
 
-## Conclusions
+## Conclusions 
 
 This is my first draft.
 
