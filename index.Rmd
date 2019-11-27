@@ -20,7 +20,7 @@ Materials:
 ```{r message =FALSE, echo = FALSE}
 library(dplyr)
 library(leaflet)
-Tree_Locations <- read.csv("Oak_Coords_Taxa.csv")
+Tree_Locations <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/Oak_Coords_Taxa.csv")
 
 Tree_map <- leaflet(data = Tree_Locations) %>% setView(lng = -77.65, lat = 42.84, zoom = 8.5)
 
