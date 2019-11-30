@@ -111,7 +111,7 @@ GA_187 <- "https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbr
 ##### As mentioned above, a comparison of the mean value chronology and the Palmer Drought Severity Index (PDSI) shows a probable correlation.  In many cases, annual variance in ring width can be explained by moisture conditions.
 ```{r message = FALSE}
 PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/PDSI_Vals.csv")
-QChron <- read.csv("QChron2.csv")
+QChron <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QChron2.csv")
 
 library(ggplot2)
 Chron_vs_PDSI <-
