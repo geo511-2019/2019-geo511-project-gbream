@@ -67,26 +67,25 @@ library(magick)
 ### Mean Value Chronology
 ##### Building a Mean Value Chronology out of the .rwi object created above using chron().  By default, chron() uses Tukey's biweight robust mean, which is unaffected by outliers and thus is a more accurate representation of the data.  The plot below plots the newly created mean chronology.  The second and third arguments of plot(), add.spline and nyrs add a smoothing spline with a wavelength (period) of 20 years.  To add clarification, the rwi, or ring-width index involves dividing each of the ring-width series by the growth trend and represents standardization of the chronology (Bunn, 2008).
 ```{r}
-QuercusMaster.crn <- chron(QuercusMaster.rwi, prefix = "CAM")
+QuercusMasterFINAL <- subset(QuercusMaster.rwi,select= -c(X182.12QR, X224., X92., X23.8QM, X183.8QR, X135.4QR, X117.8QA, X233.12QA, X276.4QR, X202.16QA, X118., X62.8QV, X16.16QA, X230.16QV, X129.16QR, X205.8QR, X240.12QR, X79.8QM, X206.12QA, X223.4QA, X237.8QR))
+  
+
+QuercusMaster.crn <- chron(QuercusMasterFINAL, prefix = "CAM")
 
 plot(QuercusMaster.crn, add.spline=TRUE, nyrs=20)
 ```
 
 
 ### Crossdating 
-##### Crossdating is of absolute importance in dendrochronology.  It involves identifying similar patterns in radial grown between multiple trees and applying those patterns to trees of unknown dates in order to ascertain the correct tree age.  In short, it assures that you are assigning the correct calendar year to the growth rings of each tree.  In the case of my cores, I am already able to accurately assign dates, since the trees were living at the time of coring and I have the dates of measurement.  That being said,   Crossdating all of the series with corr.rwl.seg().  The argument seg.length specifies the length of the segments to crossdate.  I chose the segment length to be 50 years, which is likely the longest segment that I should use, since the average series length is approximately 100 years.  By default, the overlap for the segments is half of the segment length, 25 years.  The pcrit argument specifies the critical value for the correlation.  The blue segments on the first plot below represent a significant correlation for that segment, while the red represent low correlations and thus, crossdating issues.  The issues in this case are likely due to the broad range of conditions that the series within this specific chronology come from across the Genesee Valley.  The cored trees, although from the same genus, were relatively spatially dispersed in the Genesee Valley.
+##### Crossdating is of absolute importance in dendrochronology.  It involves identifying similar patterns in radial grown between multiple trees and applying those patterns to trees of unknown dates in order to ascertain the correct tree age.  In short, it assures that you are assigning the correct calendar year to the growth rings of each tree.  In the case of my cores, I am already able to accurately assign dates, since the trees were living at the time of coring and I have the dates of measurement.  The field of dendrochronology is unique in the sciences in that series that don't crossdate well with others can be excluded in order to more accurately assess growth response to environmental or climatic conditions (Carrer, 2011).  In my study, I removed 21 series that fell below the significance threshold of 0.32 before checking for crossdating errors with corr.rwl.seg().  The argument seg.length specifies the length of the segments to crossdate.  I chose the segment length to be 50 years, which is likely the longest segment that I should use, since the average series length is approximately 100 years.  By default, the overlap for the segments is half of the segment length, 25 years.  The pcrit argument specifies the critical value for the correlation.  The blue segments on the first plot below represent a significant correlation for that segment, while the red represent low correlations and thus, crossdating issues.  
+
 ```{r }
-Cross_SEGS <- corr.rwl.seg(QuercusMaster, seg.length = 50, pcrit = 0.10)
+Cross_SEGS <- corr.rwl.seg(QuercusMasterFINAL, seg.length = 50, pcrit = 0.10)
 
 
 
 ```
-### Cross Correlation to Look at Low Correlations: Example Series X224.
-##### Series X224, a 
-```{r message = FALSE}
 
-
-```
 
 ### Growth Releases
 ##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that multiple trees experienced growth releases at 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate. 
@@ -112,7 +111,7 @@ GA_187 <- "https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbr
 ##### As mentioned above, a comparison of the mean value chronology and the Palmer Drought Severity Index (PDSI) shows a probable correlation.  In many cases, annual variance in ring width can be explained by moisture conditions.
 ```{r message = FALSE}
 PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/PDSI_Vals.csv")
-QChron <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QChron.csv")
+QChron <- read.csv("QChron2.csv")
 
 library(ggplot2)
 Chron_vs_PDSI <-
@@ -132,10 +131,12 @@ Chron_vs_PDSI
 
 ## Conclusions
 
-This is my first draft.
+This is my second draft.
 
 ## References
 Bunn AG. (2008). A dendrochronology program library in R (dplR). Dendrochronologia, 26, 115–124.
+
+Carrer, M. (2011). Individualistic and time-Varying tree-ring growth to climate sensitivity. PloS one, 6(7), e22813. doi: 10.1371/journal.pone.0022813 
 
 Nowacki GJ & Abrams, MD. (2008). Radial-growth averaging criteria for reconstructing disturbance histories from presettlement-origin oaks. Ecological Monographs, 67.
 
