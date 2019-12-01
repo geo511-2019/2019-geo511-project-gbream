@@ -102,7 +102,7 @@ plot(QuercusMaster.crn, add.spline=TRUE, nyrs=20)
 ##### A comparison of the mean value chronology and the Palmer Drought Severity Index (PDSI) shows a probable correlation.  In many cases, annual variance in ring width can be explained by moisture conditions.  I've highlighted 4 of the indicator years (years with consistently wide or narrow ring widths) in the chronology in the graph below.  The very narrow annual growth in these years consistent across the 68 included series can be explained by drought conditions in the same or previous year of growth.
 ```{r message = FALSE}
 PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/PDSI_Vals.csv")
-QChron <- read.csv("QChron3.csv")
+QChron <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QChron3.csv")
 
 library(ggplot2)
 Chron_vs_PDSI <-
