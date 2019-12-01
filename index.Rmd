@@ -99,7 +99,7 @@ plot(QuercusMaster.crn, add.spline=TRUE, nyrs=20)
 
 
 ### PDSI Correlation
-##### A comparison of the mean value chronology and the Palmer Drought Severity Index (PDSI) shows a probable correlation.  In many cases, annual variance in ring width can be explained by moisture conditions.  I've highlighted 4 of the indicator years (years with consistently wide or narrow ring widths) in the chronology in the graph below.  The very narrow annual growth in these years consistent across the 68 included series can be explained by drought conditions in the same or previous year of growth.
+##### A comparison of the mean value chronology and the Palmer Drought Severity Index (PDSI) shows a probable correlation.  The PDSI represents moisture availability in an area and is a conglomerate of temperature, precipitation, and soil properties (Sheppard, 2010).  In many cases, annual variance in ring width can be explained by moisture conditions.  I've highlighted 4 of the indicator years (years with consistently wide or narrow ring widths) in the chronology in the first graph below.  The very narrow annual growth in these years consistent across the 68 included series can be explained by drought conditions in the same or previous year of growth.  In the second graph, the RWI chronology is plotted against PDSI.  The resulting R-squared value is 0.63 indicating a moderately strong positive correlation.
 ```{r message = FALSE}
 PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/PDSI_Vals.csv")
 QChron <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QChron3.csv")
@@ -113,14 +113,23 @@ Chron_vs_PDSI <-
   geom_vline(xintercept=1909, linetype = "dotted")+
   geom_vline(xintercept=1936, linetype = "dotted")+
   geom_vline(xintercept=1991, linetype = "dotted")+
-  scale_y_continuous(sec.axis = sec_axis(~., name = "PDSI_met")) +
-  ggtitle("Mean RWI Chronology & PDSI Values") +
+  scale_y_continuous(sec.axis = sec_axis(~.*8, name = "PDSI_met")) +
+  ggtitle("Mean RWI Chronology & PDSI Values")+
+  ylab("RWI Values")+
   geom_text(aes(x=1909, label="1909", y = 0.4), angle = 90) +
   geom_text(aes(x=1965, label="1965", y = 0.4), angle = 90) +
   geom_text(aes(x=1936, label="1936", y = 0.4), angle = 90) +
   geom_text(aes(x=1991, label="1991", y = 0.4), angle = 90) 
 
 Chron_vs_PDSI
+
+library(ggpubr)
+PDSI_RWI <- read.csv("PDSI_RWI.csv")
+PDSICHRON <- 
+  ggscatter(PDSI_RWI, x = "PDSI", y = "RWI", add = "reg.line", cor.coef = TRUE, title = "RWI vs. PDSI 1895-2015")
+
+PDSICHRON
+
 
 ```
 
@@ -158,5 +167,7 @@ Bunn AG. (2008). A dendrochronology program library in R (dplR). Dendrochronolog
 Carrer, M. (2011). Individualistic and time-Varying tree-ring growth to climate sensitivity. PloS one, 6(7), e22813. doi: 10.1371/journal.pone.0022813 
 
 Nowacki GJ & Abrams, MD. (2008). Radial-growth averaging criteria for reconstructing disturbance histories from presettlement-origin oaks. Ecological Monographs, 67.
+
+Sheppard, PR. (2010). Dendroclimatology: extracting climate from trees. WIREs Climate Change, 1(3), 343-352. https://doi.org/10.1002/wcc.42
 
 Sullivan PF, Pattison, RR, Brownlee, AH, Cahoon SMP, & Hollingsworth, TN. (2016). Effect of tree-ring detrending method on apparent growth trends of black and white spruce in interior Alaska. Environmental Research Letters, 11 (11).
