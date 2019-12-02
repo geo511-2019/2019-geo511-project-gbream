@@ -169,7 +169,7 @@ GA_187 <- "https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbr
 
 ## Conclusions
 
-In all, 68 of the 86 trees exhibited similar growth responses to environmental conditions with summer moisture availability a primary driver of change.  Further, growth releases 
+In all, 68 of the 86 trees exhibited similar growth responses to environmental conditions with summer moisture availability a primary driver of change.  These 68 trees make up my chronology from the Genesee Valley.  Years indicative of 
 
 ## References
 Bunn AG. (2008). A dendrochronology program library in R (dplR). Dendrochronologia, 26, 115–124.
