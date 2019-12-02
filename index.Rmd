@@ -67,7 +67,7 @@ library(magick)
 
 
 ### Crossdating 
-##### Crossdating is of absolute importance in dendrochronology.  It involves identifying similar patterns in radial grown between multiple trees and applying those patterns to trees of unknown dates in order to ascertain the correct tree age.  It also assures that only trees with similar responses to the environment are included in a chronology.  In the case of my cores, I am already able to accurately assign dates, since the trees were living at the time of coring and I have the dates of measurement. In R, crossdating is done with corr.rwl.seg.  The argument seg.length specifies the length of the segments to crossdate.  I chose the segment length to be 50 years, which is likely the longest segment that I should use, since the average series length is approximately 100 years.  By default, the overlap for the segments is half of the segment length, 25 years.  The pcrit argument specifies the critical value for the correlation.  The blue segments on the plot below represent a significant correlation and thus crossdating success for that segment, while the red represent low correlations and potential crossdating issues.  
+##### Crossdating is of absolute importance in dendrochronology.  It involves identifying similar patterns in radial growth between multiple trees and applying those patterns to trees of unknown dates in order to ascertain the correct tree age.  It also assures that only trees with similar responses to the environment are included in a chronology.  In the case of my cores, I am already able to accurately assign dates, since the trees were living at the time of coring and I have the dates of measurement. In R, crossdating is done with corr.rwl.seg.  The argument seg.length specifies the length of the segments to crossdate.  I chose the segment length to be 50 years, which is likely the longest segment that I should use, since the average series length is approximately 100 years.  By default, the overlap for the segments is half of the segment length, 25 years.  The pcrit argument specifies the critical value for the correlation.  The blue segments on the plot below represent a significant correlation and thus crossdating success for that segment, while the red represent low correlations and potential crossdating issues.  
 
 ```{r }
 QuercusMaster_exclude <- subset(QuercusMaster, select= -c(X182.12QR, X224., X92., X23.8QM, X183.8QR, X135.4QR, X117.8QA, X233.12QA, X276.4QR, X202.16QA, X118., X62.8QV, X230.16QV, X129.16QR, X205.8QR, X79.8QM, X206.12QA, X22.12QM, X118.))
@@ -99,27 +99,36 @@ plot(QuercusMaster.crn, add.spline=TRUE, nyrs=20)
 
 
 ### PDSI Correlation
-##### A comparison of the mean value chronology and the Palmer Drought Severity Index (PDSI) shows a probable correlation.  The PDSI represents moisture availability in an area and is a conglomerate of temperature, precipitation, and soil properties (Sheppard, 2010).  In many cases, annual variance in ring width can be explained by moisture conditions.  I've highlighted 4 of the indicator years (years with consistently wide or narrow ring widths) in the chronology in the first graph below.  The very narrow annual growth in these years consistent across the 68 included series can be explained by drought conditions in the same or previous year of growth.  In the second graph, the RWI chronology is plotted against PDSI.  The resulting R-squared value is 0.63 indicating a moderately strong positive correlation.
+##### A comparison of the mean value chronology and the Palmer Drought Severity Index (PDSI) for June/July/August shows a probable correlation.  The PDSI represents moisture availability in an area and is a conglomerate of temperature, precipitation, and soil properties (Sheppard, 2010).  In many cases, annual variance in ring width can be explained by moisture conditions.  I've highlighted 6 of the indicator years (years with consistently wide or narrow ring widths) in the chronology in the first graph below.  The very narrow annual growth in these years consistent across the 68 included series can be explained by drought conditions in the same or previous year of growth.  In the second graph, the RWI chronology is plotted against the meteorological PDSI.  The resulting R-squared value is 0.63 indicating a moderately strong positive correlation.
 ```{r message = FALSE}
 PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/PDSI_Vals.csv")
+Cook_PDSI <- read.csv("CookPDSI2.csv")
 QChron <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QChron3.csv")
 
 library(ggplot2)
 Chron_vs_PDSI <-
   ggplot() + 
-  geom_line(data = QChron, aes(x = Year, y = Value), color = "blue") +
-  geom_line(data = PDSI, aes(x = Year, y = Value/8), color = "red") +
+  geom_line(data = QChron, aes(x = Year, y = Value, color = "RWI")) +
+  geom_line(data = PDSI, aes(x = Year, y = Value/8, color = "PDSI_Met")) +
+  geom_line(data = Cook_PDSI, aes(x = Year, y = Value/8, color = "PDSI_Cook")) +
   geom_vline(xintercept=1965, linetype = "dotted")+
   geom_vline(xintercept=1909, linetype = "dotted")+
   geom_vline(xintercept=1936, linetype = "dotted")+
   geom_vline(xintercept=1991, linetype = "dotted")+
-  scale_y_continuous(sec.axis = sec_axis(~.*8, name = "PDSI_met")) +
-  ggtitle("Mean RWI Chronology & PDSI Values")+
-  ylab("RWI Values")+
+  geom_vline(xintercept=1895, linetype = "dotted")+
+  geom_vline(xintercept=1868, linetype = "dotted")+
+  geom_text(aes(x=1895, label="1895", y = 0.4), angle = 90) +
+  geom_text(aes(x=1868, label="1868", y = 0.23), angle = 90) +
   geom_text(aes(x=1909, label="1909", y = 0.4), angle = 90) +
-  geom_text(aes(x=1965, label="1965", y = 0.4), angle = 90) +
-  geom_text(aes(x=1936, label="1936", y = 0.4), angle = 90) +
-  geom_text(aes(x=1991, label="1991", y = 0.4), angle = 90) 
+  geom_text(aes(x=1965, label="1965", y = 0.5), angle = 90) +
+  geom_text(aes(x=1936, label="1936", y = 0.5), angle = 90) +
+  geom_text(aes(x=1991, label="1991", y = 0.5), angle = 90) +
+  scale_y_continuous(sec.axis = sec_axis(~.*8, name = "PDSI Values")) +
+  ggtitle("Mean RWI Chronology & PDSI Values (Cook & Met)")+
+  ylab("RWI Values")+
+ 
+  scale_colour_manual(name="Legend",
+    values=c(RWI="red", PDSI_Met="blue", PDSI_Cook="dark blue"))
 
 Chron_vs_PDSI
 
@@ -130,13 +139,14 @@ PDSICHRON <-
 
 PDSICHRON
 
+  
 
 ```
 
 
 
 ### Growth Releases
-##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that multiple trees experienced growth releases at 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate. 
+##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that multiple trees experienced growth releases at 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of a larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate. 
 ```{r message=FALSE}
 library(TRADER)
 library(jpeg)
@@ -159,7 +169,7 @@ GA_187 <- "https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbr
 
 ## Conclusions
 
-This is my second draft.
+In all, 68 of the 86 trees exhibited similar growth responses to environmental conditions with summer moisture availability a primary driver of change.  Further, growth releases 
 
 ## References
 Bunn AG. (2008). A dendrochronology program library in R (dplR). Dendrochronologia, 26, 115–124.
