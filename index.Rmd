@@ -105,7 +105,7 @@ plot(QuercusMaster.crn, add.spline=TRUE, nyrs=20)
 ##### A comparison of the mean value chronology and the Palmer Drought Severity Index (PDSI) for June/July/August shows a probable correlation.  The PDSI represents moisture availability in an area and is a conglomerate of temperature, precipitation, and soil properties (Sheppard, 2010).  In many cases, annual variance in ring width can be explained by moisture conditions.  I've highlighted 6 of the indicator years (years with consistently wide or narrow ring widths) in the chronology in the first graph below.  The very narrow annual growth in these years consistent across the 68 included series can be explained by drought conditions in the same or previous year of growth.  In the second graph, the RWI chronology is plotted against the meteorological PDSI.  The resulting R-squared value is 0.63 indicating a moderately strong positive correlation.
 ```{r message = FALSE}
 PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/PDSI_Vals.csv")
-Cook_PDSI <- read.csv("CookPDSI2.csv")
+Cook_PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/CookPDSI2.csv")
 QChron <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QChron3.csv")
 
 library(ggplot2)
