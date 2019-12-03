@@ -12,7 +12,12 @@ author: "Greg Bream"
 
 Materials:
 
+* Tree cores collected from the Genesee Valley by Dr. Chris Larsen and others
 * Personally collected tree ring-width data of oak trees in the form of CSV and compact files
+
+Laboratory Methods:
+
+* Once in the lab, tree cores were sanded with progressively finer grit sandpaper until a smooth surface with visible ring boundaries was present. Tree rings were then measured using a stereomicroscope with crosshair reticle.  The Velmex Tree Ring Measuring System (TA) was used along with a UniSlide Linear Stage connected to a computer via usb.  Measurements were processed and saved in the MeasureJ2X program into the usable .rwl and .csv formats.
 
 
 
@@ -164,16 +169,19 @@ GA_187 <- "https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbr
 <center><img src="`r GA_187`"></center>
 
 
+
 ```{r, message = FALSE}
 Growth_Depth <- read.csv("Growth_Depth.csv")
-Growth_Depth <- Growth_Depth %>%
-  subset(Year>1841, Year<2008)
 
-GR_Relative <- ggplot(Growth_Depth) +
-  geom_line(aes(x = Year, y = Growth_Releases/Sample_Depth)) +
-  ggtitle("Growth Releases/Sample Depth")
+#Changing column names
+names(Growth_Depth)[1]<-"Year"
+names(Growth_Depth)[2]<-"Sample Depth"
+names(Growth_Depth)[3]<-"Trees with Growth Releases"
 
-GR_Relative
+kable(Growth_Depth) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), font_size = 15) %>%
+  row_spec(which(Growth_Depth$`Trees with Growth Releases` >= 3), bold = T, color = "red", background = NULL) %>%
+  scroll_box(width = "500px", height = "600px")
 
 ```
 
