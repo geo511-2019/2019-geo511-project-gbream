@@ -187,6 +187,7 @@ GR_Relative
 Bunn AG. (2008). A dendrochronology program library in R (dplR). Dendrochronologia, 26, 115–124.
 
 Carrer, M. (2011). Individualistic and time-Varying tree-ring growth to climate sensitivity. PloS one, 6(7), e22813. doi: 10.1371/journal.pone.0022813 
+National Climatic Data Center (NOAA). (2016). PDSI [Data File]. Retrieved from ftp://ftp.ncdc.noaa.gov/pub/data/cirs/climdiv/
 
 Nowacki GJ & Abrams, MD. (2008). Radial-growth averaging criteria for reconstructing disturbance histories from presettlement-origin oaks. Ecological Monographs, 67.
 
