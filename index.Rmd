@@ -4,13 +4,11 @@ author: "Greg Bream"
 ---
 
 ## Introduction
-##### The Genesee Valley of western New York is known for its historic oak trees. Building a mean-value chronology of trees cored in this area will allow me to infer the general environmental conditions at a given time. Crossdating will allow me to be more confident in the dates assigned and yield accuracy to the values in the chronology. Droughts, for example can be inferred from years with consistently narrow rings within the chronology.  This can be explored further by crossdating with the Palmer drought severity index. Identifying growth releases of the cored trees will allow me to identify canopy disturbance events using time periods with consistently high values.  
+##### The Genesee Valley of western New York is known for its historic oak trees. Building a mean-value chronology of trees cored in this area will allow me to infer the general environmental conditions at a given time. Crossdating will allow me to be more confident in the dates assigned and yield accuracy to the values in the chronology. Droughts, for example can be inferred from years with consistently narrow rings within the chronology.  This can be explored further through comparison with the Palmer drought severity index. Identifying growth releases of the cored trees will allow me to identify canopy disturbance events using time periods with consistently high values.  
 
 
 
 ## Materials and methods
-
-Narrative and most code will go here.  Describe what you are doing and show how to do it (with code).
 
 Materials:
 
@@ -33,8 +31,8 @@ tree_icon <- makeIcon(
   iconAnchorX = 0, iconAnchorY = 0)
 
 Tree_map <- Tree_map %>% addTiles() %>%
-  addMarkers(~Lon, ~Lat, popup = ~as.character(Site_ID), label = ~as.character(Site_ID), icon = tree_icon)
-  
+  addMarkers(~Lon, ~Lat, popup = ~as.character(Site_ID), label = paste("Site ID:", Tree_Locations$Site_ID, "|", "Taxon:", Tree_Locations$Taxon), icon = tree_icon)
+
 Tree_map
 
 ```
@@ -146,7 +144,7 @@ PDSICHRON
 
 
 ### Growth Releases
-##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that multiple trees experienced growth releases at 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of a larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate. 
+##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that 7 trees experienced growth releases in 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of a larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate.  Further analysis shows that there was a general increase in the number of growth releases with time.  This is a product of an increase in sample depth with time.
 ```{r message=FALSE}
 library(TRADER)
 library(jpeg)
@@ -166,10 +164,24 @@ GA_187 <- "https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbr
 <center><img src="`r GA_187`"></center>
 
 
+```{r, message = FALSE}
+Growth_Depth <- read.csv("Growth_Depth.csv")
+Growth_Depth <- Growth_Depth %>%
+  subset(Year>1841, Year<2008)
+
+GR_Relative <- ggplot(Growth_Depth) +
+  geom_line(aes(x = Year, y = Growth_Releases/Sample_Depth)) +
+  ggtitle("Growth Releases/Sample Depth")
+
+GR_Relative
+
+```
+
 
 ## Conclusions
 
-In all, 68 of the 86 trees exhibited similar growth responses to environmental conditions with summer moisture availability a primary driver of change.  These 68 trees make up my chronology from the Genesee Valley.  Years indicative of 
+##### The 86 oak trees as a part of this study were found spatially dispersed in the Genesee Valley from Irondequoit southward to Dalton, NY.   A variety of different microclimates exist across this relatively broad area in Western New York.  The trees in this study ranged in age from 25 to 212 years old.  The range of different environmental conditions and ages of these trees made extracting a strong climate signal difficult.  Through detrending, calculating correlations, and crossdating, I was able to build a chronology of 68 oaks, each sharing a significant correlation with the master chronology and thus common responses to environmental conditions.  When compared to the Palmer Drought Severity Index (PDSI), a significant relationship (R = .63) was found.  This affirms that the annual variance in ring width in these trees can be explained by moisture conditions.  This yields  multiple benefits; first that the growth of these trees could be used to reconstruct past climate, and second that future growth of these trees could be forecasted based on future climate predictions.  Growth releases in years of drought, or immediately following drought conditions (as determined by PDSI values) are likely to have been caused by the death of nearby trees less resilient to dry conditions.  Releases surrounded by years of abundant available moisture are likely to have been caused by other factors which could be explored with further analyses.
+
 
 ## References
 Bunn AG. (2008). A dendrochronology program library in R (dplR). Dendrochronologia, 26, 115–124.
