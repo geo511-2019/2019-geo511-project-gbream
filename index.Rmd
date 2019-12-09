@@ -8,7 +8,7 @@ author: "Greg Bream"
 
 
 
-## Materials and methods
+### Materials and methods
 
 Materials:
 
@@ -20,12 +20,23 @@ Laboratory Methods:
 * Once in the lab, tree cores were sanded with progressively finer grit sandpaper until a smooth surface with visible ring boundaries was present. Tree rings were then measured using a stereomicroscope with crosshair reticle.  The Velmex Tree Ring Measuring System (TA) was used along with a UniSlide Linear Stage connected to a computer via usb.  Measurements were processed and saved in the MeasureJ2X program into the usable .rwl and .csv formats.
 
 
+### Loading Libraries
+```{r, message = FALSE}
+library(dplR)
+library(leaflet)
+library(kableExtra)
+library(magick)
+library(ggplot2)
+library(ggpubr)
+library(TRADER)
+library(jpeg)
+```
+
+
 
 ### Study Area
 ##### Tree cores were collected from various species of Oaks from Irondequoit, NY near the shore of Lake Ontario southward through the Genesee Valley to Dalton, NY.  These areas experience relatively different patterns of precipitation annually.  Some cored trees were located in close proximity to bodies of water, while others in inherantly drier environments.  The specific environment each tree grew in likely had an impact on growth trends specific to each, as well as resistance to drought and other disturbance events.  For instance, some of the trees located more to the south lie at the eastern edge of Lake Erie's snowbelt and thus experience a greater amount of winter precipitation.  Other trees, meanwhile at the northern edge of the study area experience frequent snowfall enhancement from Lake Ontario during synoptic events.  
 ```{r message =FALSE, echo = FALSE}
-library(dplyr)
-library(leaflet)
 Tree_Locations <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/Oak_Coords_Taxa.csv")
 
 Tree_map <- leaflet(data = Tree_Locations) %>% setView(lng = -77.65, lat = 42.84, zoom = 8.5)
@@ -42,10 +53,11 @@ Tree_map
 
 ```
 
+## Results
+
 ### Plotting the Tree-Ring Series
 
 ```{r message=FALSE }
-library(dplR)
 QuercusMaster <- read.rwl("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QuercusMaster.csv")
 plot(QuercusMaster, plot.type = "spag")
 ```
@@ -59,8 +71,6 @@ Interseries_Cor <- interseries.cor(QuercusMaster, prewhiten=TRUE,
 names(Interseries_Cor)[1]<-"Correlation"
 names(Interseries_Cor)[2]<-"P-value"
 
-library(kableExtra)
-library(magick)
   kable(Interseries_Cor, digits = c(2, 4)) %>%
   kable_styling(bootstrap_options = "striped", full_width = T, position = "left", font_size = 13, fixed_thead = T) %>%
     row_spec(which(Interseries_Cor$Correlation >= .32), bold = T, color = "green", background = NULL) %>%
@@ -108,7 +118,6 @@ PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-proj
 Cook_PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/CookPDSI2.csv")
 QChron <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QChron3.csv")
 
-library(ggplot2)
 Chron_vs_PDSI <-
   ggplot() + 
   geom_line(data = QChron, aes(x = Year, y = Value, color = "RWI")) +
@@ -135,7 +144,6 @@ Chron_vs_PDSI <-
 
 Chron_vs_PDSI
 
-library(ggpubr)
 PDSI_RWI <- read.csv("PDSI_RWI.csv")
 PDSICHRON <- 
   ggscatter(PDSI_RWI, x = "PDSI", y = "RWI", add = "reg.line", cor.coef = TRUE, title = "RWI vs. PDSI 1895-2015")
@@ -151,8 +159,6 @@ PDSICHRON
 ### Growth Releases
 ##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that 7 trees experienced growth releases in 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of a larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate.  Further analysis shows that there was a general increase in the number of growth releases with time.  This is a product of an increase in sample depth with time.
 ```{r message=FALSE}
-library(TRADER)
-library(jpeg)
 Quercus_nopartials <- read.rwl("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/Quercus_Nopartials.csv")
 
 #Radial Growth Averaging for Quercus (all)
