@@ -8,7 +8,7 @@ author: "Greg Bream"
 
 
 
-### Materials and methods
+## Materials and methods
 
 Materials:
 
