@@ -10,12 +10,12 @@ author: "Greg Bream"
 
 ## Materials and methods
 
-Materials:
+**Materials:**
 
 * Tree cores collected from the Genesee Valley by Dr. Chris Larsen and others
 * Personally collected tree ring-width data of oak trees in the form of CSV and compact files
 
-Laboratory Methods:
+**Laboratory Methods:**
 
 * Once in the lab, tree cores were sanded with progressively finer grit sandpaper until a smooth surface with visible ring boundaries was present. Tree rings were then measured using a stereomicroscope with crosshair reticle.  The Velmex Tree Ring Measuring System (TA) was used along with a UniSlide Linear Stage connected to a computer via usb.  Measurements were processed and saved in the MeasureJ2X program into the usable .rwl and .csv formats.
 
@@ -57,7 +57,7 @@ Tree_map
 
 ### Plotting the Tree-Ring Series
 
-```{r message=FALSE }
+```{r message=FALSE, warning = FALSE}
 QuercusMaster <- read.rwl("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/QuercusMaster.csv")
 plot(QuercusMaster, plot.type = "spag")
 ```
@@ -112,7 +112,7 @@ plot(QuercusMaster.crn, add.spline=TRUE, nyrs=20)
 
 
 ### PDSI Correlation
-##### A comparison of the mean value chronology and the Palmer Drought Severity Index (PDSI) for June/July/August shows a probable correlation.  The PDSI represents moisture availability in an area and is a conglomerate of temperature, precipitation, and soil properties (Sheppard, 2010).  In many cases, annual variance in ring width can be explained by moisture conditions.  I've highlighted 6 of the indicator years (years with consistently wide or narrow ring widths) in the chronology in the first graph below.  The very narrow annual growth in these years consistent across the 68 included series can be explained by drought conditions in the same or previous year of growth.  In the second graph, the RWI chronology is plotted against the meteorological PDSI.  The resulting R-squared value is 0.63 indicating a moderately strong positive correlation.
+##### A comparison of the mean value chronology and the Palmer Drought Severity Index (PDSI) for June/July/August shows a probable correlation.  The PDSI represents moisture availability in an area and is a conglomerate of temperature, precipitation, and soil properties (Sheppard, 2010).  In many cases, annual variance in ring width can be explained by moisture conditions.  I've highlighted 6 of the indicator years (years with consistently wide or narrow ring widths) in the chronology in the first graph below.  The very narrow annual growth in these years consistent across the 68 included series can be explained by drought conditions in the same or previous year of growth.  In the second graph, the RWI chronology is plotted against the meteorological PDSI (NCDC, 2016).  The resulting R-squared value is 0.63 indicating a moderately strong positive correlation.
 ```{r message = FALSE}
 PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/PDSI_Vals.csv")
 Cook_PDSI <- read.csv("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/CookPDSI2.csv")
@@ -157,8 +157,8 @@ PDSICHRON
 
 
 ### Growth Releases
-##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that 7 trees experienced growth releases in 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of a larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate.  Further analysis shows that there was a general increase in the number of growth releases with time.  This is a product of an increase in sample depth with time.
-```{r message=FALSE}
+##### Growth releases are periods in a trees growth where ring-width is at least 25% greater than mean of both the preceding and subsequent 10 year period, and lasting several years (Nowacki & Abrams, 1997).  A change of 50% signifies a major release.  A growth release means that some type of disturbance event occurred near the tree.  This includes death of nearby trees due to natural or human-driven causes.  The function below, growthAveragingALL(), calculates growth releases in each series and produces graphs for each of the series in the chronology.  One thing that stands out to me is that 7 trees experienced growth releases in 1991.  Through taking measurements, 1991 was deemed what is called an indicator year.  That is, a year that is consistently narrow across the majority of the tree cores.  Through crossdating with the Palmer drought severity index (PDSI), this lack of growth was likely due to drought.  What I find interesting about this is that three of the series, x133-12QA, x165-QR, and x187-12QR experienced significantly increased growth during this time.  It is likely that these trees were smaller and in the understory, and death of a larger tree or trees in the canopy lead to in increase in available light and consequently, an increase in growth rate.  Further analysis shows that there was a general increase in the number of growth releases with time (can be seen in last table).  This is a product of an increase in sample depth with time.  The final 10 years in the table showing zero growth releases just reflects the lack of a subsequent 10 year period to compare to.
+```{r message=FALSE, warning = FALSE}
 Quercus_nopartials <- read.rwl("https://raw.githubusercontent.com/geo511-2019/2019-geo511-project-gbream/master/data/Quercus_Nopartials.csv")
 
 #Radial Growth Averaging for Quercus (all)
@@ -201,7 +201,8 @@ kable(Growth_Depth) %>%
 Bunn AG. (2008). A dendrochronology program library in R (dplR). Dendrochronologia, 26, 115–124.
 
 Carrer, M. (2011). Individualistic and time-Varying tree-ring growth to climate sensitivity. PloS one, 6(7), e22813. doi: 10.1371/journal.pone.0022813 
-National Climatic Data Center (NOAA). (2016). PDSI [Data File]. Retrieved from ftp://ftp.ncdc.noaa.gov/pub/data/cirs/climdiv/
+
+National Climatic Data Center (NCDC). (2016). climdiv-pdsidv-v1.0.0-20160204 [Data File]. Retrieved from ftp://ftp.ncdc.noaa.gov/pub/data/cirs/climdiv/
 
 Nowacki GJ & Abrams, MD. (2008). Radial-growth averaging criteria for reconstructing disturbance histories from presettlement-origin oaks. Ecological Monographs, 67.
 
